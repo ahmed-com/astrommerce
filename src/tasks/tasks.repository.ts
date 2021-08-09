@@ -4,11 +4,23 @@ import { TaskStatus } from './task-status.enum';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { User } from '../auth/user.entity';
-import { InternalServerErrorException, Logger } from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
+import { CustomLogger } from 'src/Logger/CustomLogger';
+import { ConfigService } from '@nestjs/config';
 
 @EntityRepository(Task)
 export class TasksRepository extends Repository<Task> {
-  private logger = new Logger('TasksReppository', { timestamp: true });
+  private logger;
+
+  constructor(){
+    super();
+
+    this.logger = new CustomLogger('TasksReppository', {
+      timestamp: true,
+      // stage: configService.get('STAGE'),
+      stage:'dev'
+    });
+  }
 
   async createTask(dto: CreateTaskDto, user: User): Promise<Task> {
     const { title, description } = dto;
@@ -18,7 +30,16 @@ export class TasksRepository extends Repository<Task> {
       status: TaskStatus.OPEN,
       user,
     });
-    await this.save(task);
+    try {
+      await this.save(task);
+    } catch (err) {
+      this.logger.error(
+        `Failed to save task for user: ${user.id}. Task: ${JSON.stringify(
+          dto,
+        )}`,
+        err.stack,
+      );
+    }
     return task;
   }
 

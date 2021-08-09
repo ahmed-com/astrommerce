@@ -52,12 +52,12 @@ export class CustomLogger extends ConsoleLogger {
     }
   }
 
-  error(message: string): void {
-    this.logger.error(message);
+  error(message: string, stack: string): void {
+    this.logger.error(message,stack);
     if (this.stage === 'dev') return;
 
     const fileName = this.stage === 'prod' ? 'error.log' : 'error.test.log';
-    const logMessage = '\n' + `[${this.context}] - ${new Date(Date.now())} -> ${message}`;
+    const logMessage = '\n' + `[${this.context}] - ${new Date(Date.now())} -> ${message} -> ${stack}`;
     const errorLogPath = path.join(
       __dirname,
       '..',

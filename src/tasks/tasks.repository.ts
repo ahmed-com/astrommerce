@@ -6,7 +6,6 @@ import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { User } from '../auth/user.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 import { CustomLogger } from 'src/Logger/CustomLogger';
-import { ConfigService } from '@nestjs/config';
 
 @EntityRepository(Task)
 export class TasksRepository extends Repository<Task> {
@@ -17,8 +16,7 @@ export class TasksRepository extends Repository<Task> {
 
     this.logger = new CustomLogger('TasksReppository', {
       timestamp: true,
-      // stage: configService.get('STAGE'),
-      stage:'dev'
+      stage:process.env.STAGE
     });
   }
 
@@ -39,6 +37,7 @@ export class TasksRepository extends Repository<Task> {
         )}`,
         err.stack,
       );
+      throw new InternalServerErrorException();
     }
     return task;
   }

@@ -1,15 +1,15 @@
-import { InternalServerErrorException, Logger } from '@nestjs/common';
+import { ConsoleLogger, InternalServerErrorException } from '@nestjs/common';
 import {appendFileSync} from 'fs';
 import * as path from 'path'
 // const path = require('path')
 
-export class CustomLogger extends Logger {
-  private logger: Logger;
+export class CustomLogger extends ConsoleLogger {
+  private logger: ConsoleLogger;
 
   constructor(args?: any) {
     super(args);
 
-    this.logger = new Logger(args);
+    this.logger = new ConsoleLogger(args);
   }
 
   log(message: string, context?: string): void {

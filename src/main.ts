@@ -6,7 +6,9 @@ import { TransformInterceptor } from './transform.interceptor';
 
 async function bootstrap() {
   const logger = new CustomLogger();
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule,{
+    logger
+  });
   // app.enableCors();
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor());

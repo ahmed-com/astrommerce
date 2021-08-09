@@ -3,7 +3,7 @@ import * as path from 'path';
 import { CustomLogger } from './CustomLogger';
 
 describe('CustomLogger', () => {
-  const logger = new CustomLogger();
+  const testLogger = new CustomLogger('TESTING',{stage: 'test'});
 
   const logsPath = path.join(
     __dirname,
@@ -26,7 +26,7 @@ describe('CustomLogger', () => {
     });
 
     it("should create a file and write if it doesn't exist", () => {
-      logger.log('1', 'test');
+      testLogger.log('1');
 
       expect(existsSync(generalLogPath)).toBe(true);
 
@@ -36,7 +36,7 @@ describe('CustomLogger', () => {
     });
 
     it('should append to a file that already exists', () => {
-      logger.log('2', 'test');
+      testLogger.log('2');
 
       const logs = readFileSync(generalLogPath, 'utf-8');
 
@@ -44,7 +44,8 @@ describe('CustomLogger', () => {
     });
 
     it('should NOT write to a file on development', () => {
-      logger.log('3', 'dev');
+      const devLogger = new CustomLogger('TESTING',{stage:'dev'})
+      devLogger.log('3');
 
       const logs = readFileSync(generalLogPath, 'utf-8');
 
@@ -63,7 +64,7 @@ describe('CustomLogger', () => {
     });
 
     it("should create a file and write if it doesn't exist", () => {
-      logger.error('4', 'test');
+      testLogger.error('4');
 
       expect(existsSync(errorLogPath)).toBe(true);
 
@@ -73,7 +74,7 @@ describe('CustomLogger', () => {
     });
 
     it('should append to a file that already exists', () => {
-      logger.error('5', 'test');
+      testLogger.error('5');
 
       const logs = readFileSync(errorLogPath, 'utf-8');
 
@@ -81,7 +82,8 @@ describe('CustomLogger', () => {
     });
 
     it('should NOT write to a file on development', () => {
-      logger.error('6', 'dev');
+      const devLogger = new CustomLogger('TESTING', {stage: 'dev'})
+      devLogger.error('6');
 
       const logs = readFileSync(errorLogPath, 'utf-8');
 

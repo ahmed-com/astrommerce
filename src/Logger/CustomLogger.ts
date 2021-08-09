@@ -1,24 +1,35 @@
 import { ConsoleLogger, InternalServerErrorException } from '@nestjs/common';
-import {appendFileSync , existsSync, writeFileSync} from 'fs';
-import * as path from 'path'
-// const path = require('path')
+import { appendFileSync, existsSync, writeFileSync } from 'fs';
+import * as path from 'path';
 
 export class CustomLogger extends ConsoleLogger {
   private logger: ConsoleLogger;
+  public context: string;
+  private timestamp: boolean;
+  private stage: string;
 
-  constructor(args?: any) {
-    super(args);
+  constructor(
+    context: string,
+    options: { timestamp?: boolean; stage: string } = {
+      timestamp: true,
+      stage: 'dev',
+    },
+  ) {
+    super(context,options);
 
-    this.logger = new ConsoleLogger(args);
+    this.logger = new ConsoleLogger(context,options);
+    this.context = context;
+    this.timestamp = options.timestamp;
+    this.stage = options.stage
   }
 
-  log(message: string, context?: string): void {
+  log(message: string): void {
     this.logger.log(message);
 
-    if(context && context === 'dev') return;
+    if (this.stage === 'dev') return;
 
-    const fileName = context === 'prod' ? "general.log" : "general.test.log"
-    const logMessage ='\n' + `${new Date(Date.now())} -> ${message}`;
+    const fileName = this.stage === 'prod' ? 'general.log' : 'general.test.log';
+    const logMessage = '\n' + `[${this.context}] - ${new Date(Date.now())} -> ${message}`;
     const generalLogPath = path.join(
       __dirname,
       '..',
@@ -27,26 +38,26 @@ export class CustomLogger extends ConsoleLogger {
       path.sep,
       'logs',
       path.sep,
-      fileName
+      fileName,
     );
 
     try {
-      if(!existsSync(generalLogPath)){
-        writeFileSync(generalLogPath,logMessage);
-      }else{
-        appendFileSync(generalLogPath,logMessage)
+      if (!existsSync(generalLogPath)) {
+        writeFileSync(generalLogPath, logMessage);
+      } else {
+        appendFileSync(generalLogPath, logMessage);
       }
     } catch (err) {
       throw new InternalServerErrorException('The Logger Failed');
     }
   }
 
-  error(message: string, context?: string): void {
+  error(message: string): void {
     this.logger.error(message);
-    if(context && context === 'dev') return;
-    
-    const fileName = context === 'prod' ? "error.log" : "error.test.log"
-    const logMessage = '\n' + `${new Date(Date.now())} -> ${message}` ;
+    if (this.stage === 'dev') return;
+
+    const fileName = this.stage === 'prod' ? 'error.log' : 'error.test.log';
+    const logMessage = '\n' + `[${this.context}] - ${new Date(Date.now())} -> ${message}`;
     const errorLogPath = path.join(
       __dirname,
       '..',
@@ -55,11 +66,11 @@ export class CustomLogger extends ConsoleLogger {
       path.sep,
       'logs',
       path.sep,
-      fileName
+      fileName,
     );
 
     try {
-      appendFileSync(errorLogPath, logMessage)
+      appendFileSync(errorLogPath, logMessage);
     } catch (err) {
       throw new InternalServerErrorException('The Logger Failed');
     }
